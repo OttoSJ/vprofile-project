@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  vprodb: # The name of the service being built
+    build:
+      context: ./Docker-files/db # This is the path to the docker file
+    image: ottosjonesjr/vprofiledb # This is fecting the image from docker hub repository
+    container_name: vprodb # This is the container name
+    ports:
+      - "3306:3306"
+    volumes:
+      - vprodbdata:/var/lib/mysql # This is how data can persist within a container
+    environment:
+      - MYSQL_ROOT_PASSWORD=vprodbpass
+
+  vprocache01: # The name of the service being built
+    image: memcached
+    ports:
+      - "11211:11211"
+
+  vpromq01: # The name of the service being built
+    image: rabbitmq
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=geust
+      - RABBITMQ_DEFAULT_PASS=geust
+
+  vproapp: # The name of the service being built
+    build:
+      context: ./Docker-files/app
+    image: ottosjonesjr/vprofileapp
+    container_name: vproapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps
+
+  vproweb: # The name of the service being built
+    build:
+      context: ./Docker-files/web
+    image: ottosjonesjr/vprofileweb
+    container_name: vproweb
+    ports:
+      - "80:80"
+
+volumes: # Defining volumes here allows other services to use the volumes
+  vproappdata: {}
+  vprodbdata: {}
